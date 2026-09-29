@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Dynatrace SLA &amp; MTTR Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">Dynatrace operations</p>
+        <h1>SLA &amp; MTTR dashboard</h1>
+      </div>
+      <div class="topbar-actions">
+        <label class="field compact">
+          <span>Range</span>
+          <select id="rangeSelect">
+            <option value="now-24h">Last 24 hours</option>
+            <option value="now-7d" selected>Last 7 days</option>
+            <option value="now-14d">Last 14 days</option>
+            <option value="now-30d">Last 30 days</option>
+          </select>
+        </label>
+        <button type="button" class="btn ghost" id="refreshBtn">Refresh</button>
+        <button type="button" class="btn" id="settingsBtn">Settings</button>
+      </div>
+    </header>
+
+    <p class="status-line" id="statusLine">Connect a Dynatrace environment to load live problems.</p>
+
+    <section class="kpis" id="kpiRow"></section>
+
+    <section class="panel sla-panel">
+      <div class="panel-head">
+        <div>
+          <h2>SLA control</h2>
+          <p>Availability is computed from overlapping problem downtime in the selected window. MTTR uses resolved problems only.</p>
+        </div>
+        <div class="sla-inputs">
+          <label class="field">
+            <span>Availability target (%)</span>
+            <input id="slaTarget" type="number" min="90" max="100" step="0.01" value="99.9" />
+          </label>
+          <label class="field">
+            <span>MTTR target (minutes)</span>
+            <input id="mttrTarget" type="number" min="1" max="10080" step="1" value="60" />
+          </label>
+        </div>
+      </div>
+      <div class="sla-grid" id="slaGrid"></div>
+    </section>
+
+    <section class="split">
+      <article class="panel">
+        <div class="panel-head">
+          <h2>Most frequent problems</h2>
+          <p>Grouped by problem title</p>
+        </div>
+        <div id="frequentList" class="rank-list"></div>
+      </article>
+      <article class="panel">
+        <div class="panel-head">
+          <h2>Most impacted entities</h2>
+          <div class="tabs" id="entityTabs">
+            <button type="button" class="tab active" data-type="all">All</button>
+            <button type="button" class="tab" data-type="SERVICE">Services</button>
+            <button type="button" class="tab" data-type="HOST">Hosts</button>
+            <button type="button" class="tab" data-type="APPLICATION">Applications</button>
+          </div>
+        </div>
+        <div id="impactList" class="rank-list"></div>
+      </article>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head">
+        <h2>Similar problem counts</h2>
+        <p>Recurrence, average MTTR, and last occurrence for each title</p>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Problem</th>
+              <th>Count</th>
+              <th>Open</th>
+              <th>Avg MTTR</th>
+              <th>Longest</th>
+              <th>Last seen</th>
+              <th>Severity mix</th>
+            </tr>
+          </thead>
+          <tbody id="similarBody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head">
+        <h2>Problem log</h2>
+        <p>Individual incidents used for MTTR and SLA</p>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Title</th>
+              <th>Status</th>
+              <th>Severity</th>
+              <th>Impact</th>
+              <th>Duration</th>
+              <th>Within MTTR target</th>
+              <th>Entities</th>
+            </tr>
+          </thead>
+          <tbody id="problemBody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <dialog id="settingsDialog">
+      <form method="dialog" id="settingsForm" novalidate>
+        <h2>Dynatrace connection</h2>
+        <p>Token stays in this browser and is sent only to the local proxy. Required scope: <code>problems.read</code>.</p>
+        <label class="field">
+          <span>Environment URL</span>
+          <input id="dtUrl" type="url" placeholder="https://abc12345.live.dynatrace.com" />
+        </label>
+        <label class="field">
+          <span>API token</span>
+          <input id="dtToken" type="password" placeholder="dt0c01..." />
+        </label>
+        <div class="dialog-actions">
+          <button type="button" class="btn ghost" id="demoBtn">Load sample data</button>
+          <button type="button" class="btn ghost" id="cancelSettings">Cancel</button>
+          <button type="submit" value="save" class="btn" id="saveSettings">Save &amp; load</button>
+        </div>
+      </form>
+    </dialog>
+
+    <script src="/app.js" type="module"></script>
+  </body>
+</html>
